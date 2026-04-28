@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow Pro</title>
+
+<style>
+:root{
+--bg1:#090909;
+--bg2:#151515;
+--card:rgba(255,255,255,.06);
+--text:#ffffff;
+--muted:#bcbcbc;
+--line:rgba(255,255,255,.08);
+--shadow:0 10px 30px rgba(0,0,0,.55);
+--accent:#66a8ff;
+--accent2:#8d6bff;
+--success:#11c26d;
+--danger:#ff4d6d;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,var(--bg1),var(--bg2));
+color:var(--text);
+min-height:100vh;
+overflow-x:hidden;
+}
+
+body::before,
+body::after{
+content:"";
+position:fixed;
+width:320px;
+height:320px;
+border-radius:50%;
+filter:blur(80px);
+z-index:-1;
+animation:floatBlob 8s ease-in-out infinite;
+}
+
+body::before{
+background:#66a8ff33;
+top:-120px;
+left:-80px;
+}
+
+body::after{
+background:#8d6bff33;
+bottom:-120px;
+right:-80px;
+animation-delay:2s;
+}
+
+@keyframes floatBlob{
+50%{transform:translateY(40px) scale(1.1);}
+}
+
+.container{
+width:min(1200px,95%);
+margin:auto;
+padding:25px 0 40px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+flex-wrap:wrap;
+}
+
+.logo{
+font-size:30px;
+font-weight:900;
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.clock{
+color:var(--muted);
+font-weight:600;
+}
+
+.row{
+display:grid;
+grid-template-columns:1.3fr .7fr;
+gap:20px;
+}
+
+@media(max-width:900px){
+.row{grid-template-columns:1fr;}
+}
+
+.card{
+background:var(--card);
+border:1px solid var(--line);
+backdrop-filter:blur(18px);
+border-radius:24px;
+padding:22px;
+box-shadow:var(--shadow);
+}
+
+h2{
+margin-bottom:16px;
+font-size:20px;
+}
+
+.controls{
+display:grid;
+grid-template-columns:2fr 1fr 1fr 1fr auto;
+gap:10px;
+}
+
+@media(max-width:900px){
+.controls{grid-template-columns:1fr;}
+}
+
+input,select{
+width:100%;
+padding:13px 14px;
+border:none;
+outline:none;
+border-radius:16px;
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.btn{
+padding:13px 18px;
+border:none;
+border-radius:16px;
+cursor:pointer;
+font-weight:700;
+color:#fff;
+background:linear-gradient(135deg,var(--accent),var(--accent2));
+transition:.25s;
+}
+
+.btn:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 20px rgba(102,168,255,.3);
+}
+
+.btn:active{
+transform:scale(.96);
+}
+
+.small-btn{
+padding:10px 13px;
+}
+
+.toolbar{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin:16px 0;
+}
+
+.pill{
+padding:10px 14px;
+border:none;
+border-radius:999px;
+cursor:pointer;
+color:#fff;
+background:rgba(255,255,255,.06);
+border:1px solid var(--line);
+}
+
+.pill.active{
+background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
+
+.task-list{
+min-height:260px;
+}
+
+.task{
+display:grid;
+grid-template-columns:auto 1fr auto;
+gap:14px;
+align-items:center;
+padding:14px;
+border-radius:18px;
+background:rgba(255,255,255,.04);
+margin-bottom:12px;
+border:1px solid var(--line);
+animation:slide .3s ease;
+}
+
+@keyframes slide{
+from{opacity:0;transform:translateX(-20px);}
+to{opacity:1;transform:none;}
+}
+
+.task.done{
+opacity:.6;
+}
+
+.task.done .title{
+text-decoration:line-through;
+}
+
+.check{
+width:22px;
+height:22px;
+accent-color:var(--success);
+}
+
+.title{
+font-weight:700;
+}
+
+.meta{
+font-size:13px;
+color:var(--muted);
+margin-top:4px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+}
+
+.icon{
+width:38px;
+height:38px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:#fff;
+background:rgba(255,255,255,.06);
+}
+
+.progress{
+height:12px;
+background:rgba(255,255,255,.08);
+border-radius:999px;
+overflow:hidden;
+margin-top:12px;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,var(--success),#59ffc5);
+transition:.5s;
+}
+
+.quote{
+margin-top:18px;
+color:var(--muted);
+font-style:italic;
+min-height:55px;
+}
+
+.empty{
+text-align:center;
+padding:35px;
+color:var(--muted);
+}
+
+.popup{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:999;
+}
+
+.popup-box{
+width:min(430px,92%);
+padding:24px;
+border-radius:24px;
+background:#111;
+border:1px solid var(--line);
+box-shadow:var(--shadow);
+}
+
+.popup-actions{
+display:flex;
+gap:10px;
+margin-top:18px;
+flex-wrap:wrap;
+}
+
+.footer{
+text-align:center;
+margin-top:25px;
+color:#8f8f8f;
+font-size:14px;
+line-height:1.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+<div class="logo">TaskFlow Pro</div>
+<div class="clock" id="clock">--:--</div>
+</div>
+
+<div class="row">
+
+<div class="card">
+<h2>Create Task</h2>
+
+<div class="controls">
+<input id="taskInput" placeholder="Enter your task...">
+<select id="category">
+<option>Work</option>
+<option>Study</option>
+<option>Personal</option>
+<option>Important</option>
+</select>
+<input type="date" id="date">
+<input type="time" id="time">
+<button class="btn" onclick="addTask()">Add</button>
+</div>
+
+<div class="toolbar">
+<button class="pill active" data-filter="all">All</button>
+<button class="pill" data-filter="active">Active</button>
+<button class="pill" data-filter="completed">Completed</button>
+<button class="pill" data-filter="overdue">Overdue</button>
+</div>
+
+<input id="search" placeholder="Search tasks..." style="margin-bottom:14px;">
+<div class="task-list" id="taskList"></div>
+</div>
+
+<div class="card">
+<h2>Progress</h2>
+<div id="stats">0 of 0 completed</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="quote" id="quote"></div>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 Nikhil Chauhan. All Rights Reserved.<br>
+Designed & Developed by Nikhil Chauhan 🌐
+</div>
+
+</div>
+
+<div class="popup" id="popup">
+<div class="popup-box">
+<h3>⏰ Task Reminder</h3>
+<p id="popupText"></p>
+
+<div class="popup-actions">
+<button class="btn small-btn" onclick="completeNow()">Complete Now</button>
+<button class="btn small-btn" onclick="snoozeTask()">Snooze 5 Min</button>
+<button class="pill" onclick="closePopup()">Close</button>
+</div>
+</div>
+</div>
+
+<script>
+let tasks=JSON.parse(localStorage.getItem("taskflow_tasks"))||[];
+let filter="all";
+let alarmTaskId=null;
+
+const quotes=[
+"Small progress is still progress.",
+"Focus on one task at a time.",
+"Discipline beats motivation.",
+"Your future is built today.",
+"Done is better than perfect."
+];
+
+function save(){
+localStorage.setItem("taskflow_tasks",JSON.stringify(tasks));
+}
+
+function uid(){
+return Date.now()+Math.random();
+}
+
+function addTask(){
+const text=taskInput.value.trim();
+if(!text)return;
+
+tasks.unshift({
+id:uid(),
+text,
+category:category.value,
+date:date.value,
+time:time.value,
+done:false
+});
+
+taskInput.value="";
+render();
+}
+
+taskInput.addEventListener("keydown",e=>{
+if(e.key==="Enter") addTask();
+});
+
+function render(){
+save();
+
+let list=[...tasks];
+const q=search.value.toLowerCase();
+
+if(q) list=list.filter(t=>t.text.toLowerCase().includes(q));
+if(filter==="active") list=list.filter(t=>!t.done);
+if(filter==="completed") list=list.filter(t=>t.done);
+if(filter==="overdue") list=list.filter(t=>isOverdue(t));
+
+taskList.innerHTML="";
+
+if(!list.length){
+taskList.innerHTML=`<div class="empty">📝 No tasks found <br> <br> Stay productive & add something meaningful.  </div>`;
+}
+
+list.forEach(task=>{
+const div=document.createElement("div");
+div.className="task "+(task.done?"done":"");
+
+div.innerHTML=`
+<input class="check" type="checkbox" ${task.done?"checked":""}>
+<div>
+<div class="title" contenteditable="true">${task.text}</div>
+<div class="meta">${task.category} • ${task.date||"No Date"} ${task.time||""} ${isOverdue(task)&&!task.done?" • ⛔ Overdue":""}</div>
+</div>
+<div class="actions">
+<button class="icon">🗑</button>
+</div>
+`;
+
+div.querySelector(".check").onchange=()=>{
+task.done=!task.done;
+render();
+};
+
+div.querySelector(".icon").onclick=()=>{
+tasks=tasks.filter(x=>x.id!==task.id);
+render();
+};
+
+div.querySelector(".title").onblur=(e)=>{
+task.text=e.target.innerText.trim()||task.text;
+render();
+};
+
+taskList.appendChild(div);
+});
+
+updateStats();
+}
+
+function updateStats(){
+const total=tasks.length;
+const done=tasks.filter(t=>t.done).length;
+const percent=total?Math.round(done/total*100):0;
+
+stats.innerText=`${done} of ${total} completed`;
+bar.style.width=percent+"%";
+}
+
+function isOverdue(task){
+if(!task.date||!task.time||task.done)return false;
+return new Date()>new Date(task.date+"T"+task.time);
+}
+
+document.querySelectorAll(".pill[data-filter]").forEach(btn=>{
+btn.onclick=()=>{
+document.querySelectorAll(".pill[data-filter]").forEach(x=>x.classList.remove("active"));
+btn.classList.add("active");
+filter=btn.dataset.filter;
+render();
+};
+});
+
+search.oninput=render;
+
+setInterval(()=>{
+clock.innerText=new Date().toLocaleString();
+},1000);
+
+let qi=0;
+function rotateQuote(){
+quote.innerText=quotes[qi++%quotes.length];
+}
+rotateQuote();
+setInterval(rotateQuote,5000);
+
+function beep(){
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+const osc=ctx.createOscillator();
+const gain=ctx.createGain();
+
+osc.frequency.value=700;
+gain.gain.value=.06;
+
+osc.connect(gain);
+gain.connect(ctx.destination);
+osc.start();
+osc.stop(ctx.currentTime+.5);
+}
+
+setInterval(()=>{
+const now=new Date();
+
+tasks.forEach(t=>{
+if(t.done||!t.date||!t.time||t.alerted)return;
+
+const due=new Date(t.date+"T"+t.time);
+
+if(now>=due){
+t.alerted=true;
+alarmTaskId=t.id;
+beep();
+popup.style.display="flex";
+popupText.innerText=`"${t.text}" is due now!`;
+save();
+}
+});
+},10000);
+
+function closePopup(){
+popup.style.display="none";
+}
+
+function completeNow(){
+const task=tasks.find(t=>t.id===alarmTaskId);
+if(task) task.done=true;
+closePopup();
+render();
+}
+
+function snoozeTask(){
+const task=tasks.find(t=>t.id===alarmTaskId);
+if(task){
+const d=new Date();
+d.setMinutes(d.getMinutes()+5);
+task.date=d.toISOString().slice(0,10);
+task.time=d.toTimeString().slice(0,5);
+task.alerted=false;
+}
+closePopup();
+render();
+}
+
+render();
+</script>
+
+</body>
+</html>
